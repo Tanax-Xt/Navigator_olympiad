@@ -157,7 +157,7 @@ def set_level(call, user_level):
 def admin_get_users(users):
     out = []
     for i in users:
-        out.append(str(i[0]) + ' ' + str(i[1]) + ' @' + i[2] + ' ' + i[3] + ' ' + str(i[4]) + ' ' + str(i[5]) + i[7])
+        out.append(str(i[0]) + ' ' + str(i[1]) + ' @' + i[2] + ' ' + i[3] + ' ' + str(i[4]) + ' ' + str(i[5]) + ' ' + i[7])
     return out
 
 
