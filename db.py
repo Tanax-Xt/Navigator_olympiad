@@ -73,6 +73,22 @@ class BotDB:
     def get_last_admin_text(self):
         return list(self.cursor.execute("SELECT * FROM `admin_texts` ORDER BY `text_id` DESC LIMIT 1"))[0]
 
+    def last_olymp_exist(self, user_id) -> bool:
+        result = self.cursor.execute("SELECT `last_olymp` FROM `users` WHERE `user_id` = ?", (user_id,))
+        return bool(len(result.fetchall()))
+
+    def get_last_olymp(self, user_id):
+        result = self.cursor.execute("SELECT `last_olymp` FROM `users` WHERE `user_id` = ?", (user_id,))
+        return result.fetchone()[0]
+
+    def reset_last_olymp(self, user_id, name):
+        self.cursor.execute("UPDATE `users` SET `last_olymp` = ? WHERE `user_id` = ?", (name, user_id,))
+        self.conn.commit()
+
+    def del_last_olymp(self, user_id):
+        self.cursor.execute("UPDATE `users` SET `last_olymp`= NULL WHERE `user_id` = ?", (user_id,))
+        self.conn.commit()
+
     def close(self):
         """Закрываем соединение с БД"""
         self.conn.close()

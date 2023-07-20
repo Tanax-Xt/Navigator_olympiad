@@ -51,6 +51,25 @@ def olymp(call):
                 olymp = OLYMPIADS[(OLYMPIADS['response'] == user_subj) & (OLYMPIADS['min_class'] <= user_class) & (
                         OLYMPIADS['max_class'] >= user_class) & (
                                           OLYMPIADS['level'] == user_level)].sample()
+            if db.last_olymp_exist(call.from_user.id):
+                x = 0
+                last_olymp = db.get_last_olymp(call.from_user.id)
+                while list(olymp['name'])[0] == last_olymp and x < 40:
+                    x += 1
+                    if user_level == 0:
+                        olymp = OLYMPIADS[
+                            (OLYMPIADS['response'] == user_subj) & (OLYMPIADS['min_class'] <= user_class) & (
+                                    OLYMPIADS['max_class'] >= user_class)].sample()
+                    else:
+                        olymp = OLYMPIADS[
+                            (OLYMPIADS['response'] == user_subj) & (OLYMPIADS['min_class'] <= user_class) & (
+                                    OLYMPIADS['max_class'] >= user_class) & (
+                                    OLYMPIADS['level'] == user_level)].sample()
+
+            # print(call.message)
+            db.reset_last_olymp(call.from_user.id, list(olymp['name'])[0])
+
+            # print(db.get_last_olymp(call.message.from_user.id))
 
             bot.send_message(call.message.chat.id,
                              OLYMP_TEXT_PART_1[random.randint(0, len(OLYMP_TEXT_PART_1) - 1)] + ' `' + olymp[
@@ -151,6 +170,7 @@ def set_level(call, user_level):
     bot.edit_message_text('✅ Предмет, класс и уровень успешно выбраны',
                           call.message.chat.id, call.message.message_id,
                           reply_markup=None)
+    db.del_last_olymp(call.from_user.id)
     olymp(call)
 
 
@@ -298,6 +318,11 @@ def query_handler(call):
         set_subj(call, 'химия')
     elif call.data == 'economy':
         set_subj(call, 'экономика')
+    elif call.data == 'linguistics':
+        set_subj(call, 'лингвистика')
+    elif call.data == 'technology':
+        set_subj(call, 'технология')
+
 
     elif call.data == '2':
         set_class(call, 2)
