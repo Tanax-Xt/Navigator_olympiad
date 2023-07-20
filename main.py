@@ -157,12 +157,13 @@ def set_level(call, user_level):
 def admin_get_users(users):
     out = []
     for i in users:
-        out.append(str(i[0]) + ' ' + str(i[1]) + ' @' + i[2] + ' ' + i[3] + ' ' + str(i[4]) + ' ' + str(i[5]) + ' ' + i[7])
+        out.append(
+            str(i[0]) + ' ' + str(i[1]) + ' @' + i[2] + ' ' + i[3] + ' ' + str(i[4]) + ' ' + str(i[5]) + ' ' + i[7])
     return out
 
 
 def admin_check_text(message):
-    bot.send_message(ADMIN_ID,
+    bot.send_message(message.chat.id,
                      f'Ты действительно хочешь отправить следующий текст {db.get_users_count()} пользователям\n\n' + message.text,
                      reply_markup=menus.admin_send_text)
     db.add_admin_text(message.from_user.id, message.from_user.username, message.text)
@@ -175,17 +176,18 @@ def admin_confirmation_text(message):
 
 
 def admin_send_text(message):
-    bot.edit_message_text('Рассылка успешно началась', message.chat.id, message.message_id,
-                          reply_markup=menus.go_out_menu)
-    db.set_admin_text_status(db.get_last_admin_text()[0])
+    if message.from_user.id == ADMIN_ID:
+        bot.edit_message_text('Рассылка успешно началась', message.chat.id, message.message_id,
+                              reply_markup=menus.go_out_menu)
+        db.set_admin_text_status(db.get_last_admin_text()[0])
 
-    for user in db.get_users_list():
-        try:
-            bot.send_message(user[1],
-                             '🔔 Тебе пришло сообщение от администрации "Навигатора олимпиад"\n\n' +
-                             db.get_last_admin_text()[3])
-        except:
-            pass
+        for user in db.get_users_list():
+            try:
+                bot.send_message(user[1],
+                                 '🔔 Тебе пришло сообщение от администрации "Навигатора олимпиад"\n\n' +
+                                 db.get_last_admin_text()[3])
+            except:
+                pass
 
 
 @bot.message_handler(commands=['start'])
@@ -330,11 +332,14 @@ def query_handler(call):
 
 
     elif call.data == 'admin_get_db':
-        bot.send_document(ADMIN_ID, open('data/users.db', 'rb'))
+        if call.message.from_user.id == ADMIN_ID:
+            bot.send_document(call.message.chat.id, open('data/users.db', 'rb'))
     elif call.data == 'admin_20_users':
-        bot.send_message(ADMIN_ID, '\n'.join(admin_get_users(db.get_users_list()[:20])))
+        if call.message.from_user.id == ADMIN_ID:
+            bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list()[:20])))
     elif call.data == 'admin_all_users':
-        bot.send_message(ADMIN_ID, '\n'.join(admin_get_users(db.get_users_list())))
+        if call.message.from_user.id == ADMIN_ID:
+            bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list())))
     elif call.data == 'admin_start_message':
         mesg = bot.edit_message_text('Введи текст, которых хочешь отправить', call.message.chat.id,
                                      call.message.message_id)
