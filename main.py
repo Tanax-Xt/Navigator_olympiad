@@ -176,18 +176,17 @@ def admin_confirmation_text(message):
 
 
 def admin_send_text(message):
-    if message.from_user.id == ADMIN_ID:
-        bot.edit_message_text('Рассылка успешно началась', message.chat.id, message.message_id,
-                              reply_markup=menus.go_out_menu)
-        db.set_admin_text_status(db.get_last_admin_text()[0])
+    bot.edit_message_text('Рассылка успешно началась', message.chat.id, message.message_id,
+                          reply_markup=menus.go_out_menu)
+    db.set_admin_text_status(db.get_last_admin_text()[0])
 
-        for user in db.get_users_list():
-            try:
-                bot.send_message(user[1],
-                                 '🔔 Тебе пришло сообщение от администрации "Навигатора олимпиад"\n\n' +
-                                 db.get_last_admin_text()[3])
-            except:
-                pass
+    for user in db.get_users_list():
+        try:
+            bot.send_message(user[1],
+                             '🔔 Тебе пришло сообщение от администрации "Навигатора олимпиад"\n\n' +
+                             db.get_last_admin_text()[3])
+        except:
+            pass
 
 
 @bot.message_handler(commands=['start'])
@@ -332,14 +331,11 @@ def query_handler(call):
 
 
     elif call.data == 'admin_get_db':
-        if call.message.from_user.id == ADMIN_ID:
-            bot.send_document(call.message.chat.id, open('data/users.db', 'rb'))
+        bot.send_document(call.message.chat.id, open('data/users.db', 'rb'))
     elif call.data == 'admin_20_users':
-        if call.message.from_user.id == ADMIN_ID:
-            bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list()[:20])))
+        bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list()[:20])))
     elif call.data == 'admin_all_users':
-        if call.message.from_user.id == ADMIN_ID:
-            bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list())))
+        bot.send_message(call.message.chat.id, '\n'.join(admin_get_users(db.get_users_list())))
     elif call.data == 'admin_start_message':
         mesg = bot.edit_message_text('Введи текст, которых хочешь отправить', call.message.chat.id,
                                      call.message.message_id)
