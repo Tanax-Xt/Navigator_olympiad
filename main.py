@@ -239,7 +239,7 @@ def help(message):
 
 @bot.message_handler(commands=['admin'])
 def admin(message):
-    bot.send_message(message.from_user.id, message.from_user.id)
+    bot.send_message(message.chat.id, message.from_user.id)
     if message.from_user.id == ADMIN_ID:
         bot.send_message(message.from_user.id, f'''Admin панель
 Количество пользователей - `{db.get_users_count()}`
