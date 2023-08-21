@@ -16,7 +16,7 @@ RANDOM_TEXT_PART_1 = [f'Тебе выпала', 'Звёзды подсказыв
                       'Тебе может понравиться']
 OLYMP_TEXT_PART_1 = ['Я нашел олимпиаду, которая тебе понравится', 'Тебе подходит', "Эта олимпиада тебе подходит"]
 
-TOKEN = '6299843038:AAF8zhHVld9ppNf6Uen0zFMemfUU62Wfnh4'
+TOKEN = '6299843038:AAGbmCMD8hnOvyOZSj7d6M2AkcSxTIiCftU'
 
 OLYMPIADS = pd.read_csv("data/olympiads.csv", on_bad_lines='skip')
 
