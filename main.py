@@ -25,7 +25,11 @@ def update_class(call):
 
 
 def update_level(call):
-    bot.edit_message_text('Выбери уровень олимпиады\nЕго можно будет изменить позже',
+    bot.edit_message_text('''Выбери уровень олимпиады\n
+1 уровень дает возможность поступить в ВУЗ БВИ.
+2 уровень дает возможность получить 100 баллов ЕГЭ по предмету, соответствующему профилю олимпиды.
+3 уровень дает льготы на усмотрение ВУЗа.\n
+Его можно будет изменить позже''',
                           call.message.chat.id, call.message.message_id,
                           reply_markup=menus.olymp_levels_menu)
 
@@ -74,39 +78,68 @@ def olymp(call):
             bot.send_message(call.message.chat.id,
                              OLYMP_TEXT_PART_1[random.randint(0, len(OLYMP_TEXT_PART_1) - 1)] + ' `' + olymp[
                                  'name'] + '` по профилю ' + olymp[
-                                 'profile'] + '\n\nКлассы, в которых можно принять участие: ' + olymp[
-                                 'class'] + '\n\nУровень олимпиады: ' + olymp['level'].to_string().split()[
-                                 1] + '\n\n📘 Подробная информация:\n' + f'· Номер в перечне олимпиад - {int(float(olymp["num_in_list"].to_string().split()[1]))}' \
+                                 'profile'] + f'\n\nКлассы, в которых можно принять участие: с {olymp["min_class"].to_string().split()[1]} по {olymp["max_class"].to_string().split()[1]}' + f'\n\nУровень олимпиады: {int(float(olymp["level"].to_string().split()[1]))}' + '\n\n📘 Подробная информация:\n' + f'· Номер в перечне олимпиад - {int(float(olymp["num_in_list"].to_string().split()[1]))}' \
                              + f'\n· Предметы, на которые стоит обратить внимание при подготовке: {" ".join(olymp["prof_subject"].to_string().split()[1:])}' \
-                             + f'\n· Этапы олимпиады - {" ".join(olymp["stage"].to_string().split()[1:])}',
-                             reply_markup=menus.olymp_menu, parse_mode='MARKDOWN')
+                             + f'\n· Этапы олимпиады - {" ".join(olymp["stage"].to_string().split()[1:])}' \
+                             + f'\n· Ссылка на олимпиаду - {olymp["link"].to_string().split()[1]}',
+                             reply_markup=menus.olymp_menu, parse_mode='MARKDOWN', disable_web_page_preview=True)
         except:
             bot.send_message(call.message.chat.id,
                              f"К сожалению, у меня не получилось найти олимпиаду {'любого' if user_level == 0 else user_level} уровня по {morph.parse(user_subj)[0].inflect({'datv'}).word} для {user_class} класса\n\nПоменяй класс, предмет или уровень олимпиады и попробуй снова!",
                              reply_markup=menus.olymp_menu2)
 
 
-def random_olymp(message):
-    rndm_olymp = OLYMPIADS.sample()
+def update_prof(message):
     bot.send_message(message.chat.id,
-                     RANDOM_TEXT_PART_1[random.randint(0, len(RANDOM_TEXT_PART_1) - 1)] + ' `' + rndm_olymp[
-                         'name'] + '` по профилю ' + rndm_olymp[
-                         'profile'] + '\n\nКлассы, в которых можно принять участие: ' + rndm_olymp[
-                         'class'] + '\n\nУровень олимпиады: ' + rndm_olymp['level'].to_string().split()[
-                         1] + '\n\n📘 Подробная информация:\n' + f'· Номер в перечне олимпиад - {int(float(rndm_olymp["num_in_list"].to_string().split()[1]))}' \
-                     + f'\n· Предметы, на которые стоит обратить внимание при подготовке: {" ".join(rndm_olymp["prof_subject"].to_string().split()[1:])}' \
-                     + f'\n· Этапы олимпиады - {" ".join(rndm_olymp["stage"].to_string().split()[1:])}',
-                     reply_markup=menus.random_olymp_menu, parse_mode='MARKDOWN')
+                     'Выбери профиль, по которому хочешь найти олимпиаду' + '\nЕго можно будет изменить позже',
+                     reply_markup=menus.update_prof_menu)
 
 
-def menu(call):
-    bot.edit_message_text(f'''Ты находишься в меню "Навигатора олимпиад"\n
+def check_choose_random(call):
+    print(db.last_random_olymp_exist(call.from_user.id))
+    print(db.user_exists(call.from_user.id))
+    if db.user_exists(call.from_user.id) and db.last_random_olymp_exist(call.from_user.id)[0] is not None:
+        return True
+    else:
+        update_prof(call.message)
+        return False
+
+
+def random_olymp(call):
+    if check_choose_random(call):
+        user_prof = db.get_user_prof(call.from_user.id)
+        if user_prof == 'Любой':
+            rndm_olymp = OLYMPIADS.sample()
+        else:
+            rndm_olymp = OLYMPIADS[OLYMPIADS['response'].isin(RANDOM_PROF[user_prof])].sample()
+        # rndm_olymp = OLYMPIADS.sample()
+        bot.send_message(call.message.chat.id,
+                         RANDOM_TEXT_PART_1[random.randint(0, len(RANDOM_TEXT_PART_1) - 1)] + ' `' + rndm_olymp[
+                             'name'] + '` по профилю ' + rndm_olymp[
+                             'profile'] + f'\n\nКлассы, в которых можно принять участие: с {rndm_olymp["min_class"].to_string().split()[1]} по {rndm_olymp["max_class"].to_string().split()[1]}' +
+                         f'\n\nУровень олимпиады: {int(float(rndm_olymp["level"].to_string().split()[1]))}' + '\n\n📘 Подробная информация:\n' + f'· Номер в перечне олимпиад - {int(float(rndm_olymp["num_in_list"].to_string().split()[1]))}' \
+                         + f'\n· Предметы, на которые стоит обратить внимание при подготовке: {" ".join(rndm_olymp["prof_subject"].to_string().split()[1:])}' \
+                         + f'\n· Этапы олимпиады - {" ".join(rndm_olymp["stage"].to_string().split()[1:])}' \
+                         + f'\n· Ссылка на олимпиаду - {rndm_olymp["link"].to_string().split()[1]}',
+                         reply_markup=menus.random_olymp_menu, parse_mode='MARKDOWN', disable_web_page_preview=True)
+
+
+def menu(message):
+    bot.edit_message_text(f'''🚀 Ты находишься в меню "Навигатора олимпиад"\n
 "Навигатор олимпиад" может подобрать олимпиаду из Перечня, утвержденного Министерством науки и высшего образования России, которая подходит именно тебе!\n
 Чтобы воспользоваться ботом, используй одну из кнопок ниже\n
-Подписывайся на наше сообщество во ВКонтакте и следи за всеми новостями https://vk.com/navigator_olympiad''',
-                          call.message.chat.id, call.message.message_id,
-                          reply_markup=menus.menu_menu)
+✅ Подписывайся на наше сообщество во ВКонтакте и следи за всеми новостями https://vk.com/navigator_olympiad''',
+                          message.chat.id, message.message_id,
+                          reply_markup=menus.menu_menu, disable_web_page_preview=True)
     # bot.send_message(message.chat.id, )
+
+
+def menu_send_message(message):
+    bot.send_message(message.chat.id, f'''🚀 Ты находишься в меню "Навигатора олимпиад"\n
+"Навигатор олимпиад" может подобрать олимпиаду из Перечня, утвержденного Министерством науки и высшего образования России, которая подходит именно тебе!\n
+Чтобы воспользоваться ботом, используй одну из кнопок ниже\n
+✅ Подписывайся на наше сообщество во ВКонтакте и следи за всеми новостями https://vk.com/navigator_olympiad''',
+                     reply_markup=menus.menu_menu, disable_web_page_preview=True)
 
 
 def levels(message):
@@ -174,6 +207,18 @@ def set_level(call, user_level):
     olymp(call)
 
 
+def set_prof(call, prof):
+    if db.user_exists(call.from_user.id):
+        db.set_user_prof(call.from_user.id, prof)
+    else:
+        db.add_user_from_prof(call.from_user.id, call.from_user.username, prof)
+    bot.answer_callback_query(call.id, text="Профиль выбран")
+    bot.edit_message_text('✅ Профиль успешно выбран',
+                          call.message.chat.id, call.message.message_id,
+                          reply_markup=None)
+    random_olymp(call)
+
+
 def admin_get_users(users):
     out = []
     for i in users:
@@ -209,6 +254,27 @@ def admin_send_text(message):
             pass
 
 
+def send_message_tech_support(message):
+    bot.send_message(message.chat.id,
+                     f'Твой вопрос:\n{message.text}\n\nВопрос успешно отправлен администрации проекта! В скором времени тебе придет ответ')
+    db.add_user_text(message.chat.id, message.from_user.username, message.text)
+    send_answer_support = menus.get_ans_for_user(db.get_last_question_id()[0])
+    bot.send_message(SUPPORT_CHAT_ID, f'''❓ Новый вопрос
+user: @{message.from_user.username}
+вопрос: {message.text}''', reply_markup=send_answer_support)
+    menu_send_message(message)
+
+
+def send_answer_to_user(message, id):
+    user_id = db.get_user_id_from_question_id(id)[0]
+    db.add_admin_ans(id, message.from_user.username, message.text)
+    question = db.get_user_question_text(id)
+    bot.send_message(user_id, f'''🔔 Пришел ответ от администрации на ваш вопрос\n
+❓ Вопрос: {question}\n
+❗️ Ответ: {message.text}''')
+    bot.send_message(message.chat.id, 'Ответ отправлен!')
+
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, text=f"{START_TEXT[random.randint(0, len(START_TEXT) - 1)]}",
@@ -237,11 +303,17 @@ def help(message):
                      reply_markup=menus.help_menu)
 
 
+@bot.message_handler(commands=['support'])
+def message_to_support(message):
+    bot.send_message(message.chat.id, 'Воспользуйся кнопками ниже, чтобы задать вопрос в техническую поддержку проекта',
+                     reply_markup=menus.send_message_to_support_menu)
+
+
 @bot.message_handler(commands=['admin'])
 def admin(message):
     # bot.send_message(message.chat.id, message.from_user.id)
     if message.from_user.id == ADMIN_ID:
-        bot.send_message(message.from_user.id, f'''Admin панель
+        bot.send_message(message.chat.id, f'''Admin панель
 Количество пользователей - `{db.get_users_count()}`
 Количество олимпиад - `{len(OLYMPIADS)}`''', reply_markup=menus.admin_menu, parse_mode='MARKDOWN')
     else:
@@ -261,7 +333,10 @@ def not_command(message):
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
     if call.data == 'menu':
-        menu(call)
+        menu(call.message)
+    if call.data == 'menu_send_message':
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+        menu_send_message(call.message)
     elif call.data == 'help':
         help(call.message)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
@@ -269,7 +344,7 @@ def query_handler(call):
         olymp(call)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
     elif call.data == 'random_olymp_menu':
-        random_olymp(call.message)
+        random_olymp(call)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
     elif call.data == 'levels':
         levels(call.message)
@@ -279,6 +354,9 @@ def query_handler(call):
         advantages(call.message)
     elif call.data == 'update':
         update_subj(call)
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+    elif call.data == 'update_prof':
+        update_prof(call.message)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
 
     elif call.data == 'astronomy':
@@ -323,7 +401,18 @@ def query_handler(call):
         set_subj(call, 'лингвистика')
     elif call.data == 'technology':
         set_subj(call, 'технология')
-
+    elif call.data == 'Technical_sciences':
+        set_prof(call, 'Технические науки')
+    elif call.data == 'Natural_sciences':
+        set_prof(call, 'Естественные науки')
+    elif call.data == 'Social_Sciences':
+        set_prof(call, 'Социальные науки')
+    elif call.data == 'Humanities':
+        set_prof(call, 'Гуманитарные науки')
+    elif call.data == 'Creation':
+        set_prof(call, 'Творчество')
+    elif call.data == 'any_profile':
+        set_prof(call, 'Любой')
 
     elif call.data == '2':
         set_class(call, 2)
@@ -367,11 +456,24 @@ def query_handler(call):
                                      call.message.message_id)
         bot.register_next_step_handler(mesg, admin_check_text)
     elif call.data == 'admin_no':
-        menu(call)
+        menu(call.message)
     elif call.data == 'admin_yes':
         admin_confirmation_text(call.message)
     elif call.data == 'admin_yes_yes':
         admin_send_text(call.message)
+
+    elif call.data == 'write_technical_support':
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+        mesg = bot.send_message(call.message.chat.id,
+                                'Напиши ниже свой вопрос, который хочешь задать администрации проекта, и отправь мне его. Не забудь указать причину обращения',
+                                reply_markup=menus.go_out_menu)
+        bot.register_next_step_handler(mesg, send_message_tech_support)
+    elif 'write_technical_support_' in call.data:
+        id = call.data[24:]
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+        mesg = bot.send_message(call.message.chat.id,
+                                'Напиши ответ ниже')
+        bot.register_next_step_handler(mesg, send_answer_to_user, id)
 
 
 bot.polling(non_stop=True)
