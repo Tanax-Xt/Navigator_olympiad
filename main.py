@@ -33,7 +33,7 @@ def update_level(call):
                           call.message.chat.id, call.message.message_id,
                           reply_markup=menus.olymp_levels_menu)
 
-
+# !
 def check_choose(call):
     if db.user_exists(call.from_user.id):
         return True
@@ -41,7 +41,7 @@ def check_choose(call):
         update_subj(call)
         return False
 
-
+# 1
 def olymp(call):
     if check_choose(call):
         user_subj = db.get_user_subj(call.from_user.id)
@@ -94,17 +94,17 @@ def update_prof(message):
                      'Выбери профиль, по которому хочешь найти олимпиаду' + '\nЕго можно будет изменить позже',
                      reply_markup=menus.update_prof_menu)
 
-
+# 1
 def check_choose_random(call):
-    print(db.last_random_olymp_exist(call.from_user.id))
-    print(db.user_exists(call.from_user.id))
+    # print(db.last_random_olymp_exist(call.from_user.id))
+    # print(db.user_exists(call.from_user.id))
     if db.user_exists(call.from_user.id) and db.last_random_olymp_exist(call.from_user.id)[0] is not None:
         return True
     else:
         update_prof(call.message)
         return False
 
-
+# 1
 def random_olymp(call):
     if check_choose_random(call):
         user_prof = db.get_user_prof(call.from_user.id)
@@ -179,7 +179,7 @@ def advantages(message):
                           message.chat.id, message.message_id,
                           reply_markup=menus.advantages_menu)
 
-
+# 1
 def set_subj(call, subj):
     if db.user_exists(call.from_user.id):
         db.set_user_subj(call.from_user.id, subj)
@@ -188,14 +188,14 @@ def set_subj(call, subj):
     bot.answer_callback_query(call.id, text="Предмет выбран")
     update_class(call)
 
-
+# 1
 def set_class(call, user_class):
     db.set_user_class(call.from_user.id, user_class)
     bot.answer_callback_query(call.id, text="Класс выбран")
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
     update_level(call)
 
-
+# 1
 def set_level(call, user_level):
     db.set_user_level(call.from_user.id, user_level)
     bot.answer_callback_query(call.id, text="Уровень выбран")
@@ -206,7 +206,7 @@ def set_level(call, user_level):
     db.del_last_olymp(call.from_user.id)
     olymp(call)
 
-
+# 1
 def set_prof(call, prof):
     if db.user_exists(call.from_user.id):
         db.set_user_prof(call.from_user.id, prof)
