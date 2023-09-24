@@ -35,7 +35,7 @@ def update_level(call):
 
 # !
 def check_choose(call):
-    if db.user_exists(call.from_user.id):
+    if db.user_exists(call.from_user.id) and db.last_olymp_exist(call.from_user.id)[0] is not None:
         return True
     else:
         update_subj(call)
@@ -181,6 +181,7 @@ def advantages(message):
 
 # 1
 def set_subj(call, subj):
+    # print(db.user_exists(call.from_user.id))
     if db.user_exists(call.from_user.id):
         db.set_user_subj(call.from_user.id, subj)
     else:

@@ -110,6 +110,10 @@ class BotDB:
         result = self.cursor.execute("SELECT `random_subj` FROM `users` WHERE `user_id` = ?", (user_id,))
         return result.fetchone()[0]
 
+    def last_olymp_exist(self, user_id):
+        result = self.cursor.execute("SELECT `subj` FROM `users` WHERE `user_id` = ?", (user_id,))
+        return result.fetchall()[0]
+
     def last_random_olymp_exist(self, user_id):
         result = self.cursor.execute("SELECT `random_subj` FROM `users` WHERE `user_id` = ?", (user_id,))
         return result.fetchall()[0]
