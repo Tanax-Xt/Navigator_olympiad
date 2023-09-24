@@ -16,7 +16,7 @@ RANDOM_TEXT_PART_1 = [f'Тебе выпала', 'Звёзды подсказыв
                       'Тебе может понравиться']
 OLYMP_TEXT_PART_1 = ['Я нашел олимпиаду, которая тебе понравится', 'Тебе подходит', "Эта олимпиада тебе подходит"]
 
-TOKEN = '6299843038:AAEVFJBWc6iw8FpS3_Os8NJpaHV61eWD8VI' # navigator
+TOKEN = '6299843038:AAEF_P9M-J5LipQhkODdrZ13DKRcf-ZQ2fY' # navigator
 # TOKEN = '5436835423:AAFrLWVJWu0zZSTbp04UIJ2Ooqjxgw1bzI8'  # foxbot
 
 # OLYMPIADS = pd.read_csv("data/olympiads.csv", on_bad_lines='skip')
